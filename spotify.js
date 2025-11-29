@@ -23,8 +23,9 @@ function generateCodeChallenge(verifier) {
 function getAuthorizationUrl(username) {
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = generateCodeChallenge(codeVerifier);
-  
-  const scope = 'user-read-currently-playing';
+
+  // request both scopes to be safe
+  const scope = 'user-read-currently-playing user-read-playback-state';
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: 'code',
@@ -60,7 +61,7 @@ async function exchangeCodeForToken(code, codeVerifier) {
       expiresAt: Date.now() + (response.data.expires_in * 1000)
     };
   } catch (err) {
-    console.error('Error exchanging code for token:', err.message);
+    console.error('Error exchanging code for token:', err.response?.data || err.message);
     throw err;
   }
 }
@@ -82,7 +83,7 @@ async function refreshAccessToken(refreshToken) {
       expiresAt: Date.now() + (response.data.expires_in * 1000)
     };
   } catch (err) {
-    console.error('Error refreshing token:', err.message);
+    console.error('Error refreshing token:', err.response?.data || err.message);
     throw err;
   }
 }
@@ -93,7 +94,7 @@ async function getCurrentlyPlaying(accessToken) {
       headers: { 'Authorization': `Bearer ${accessToken}` }
     });
 
-    if (response.status === 204 || !response.data.item) {
+    if (response.status === 204 || !response.data || !response.data.item) {
       return null;
     }
 
@@ -110,7 +111,7 @@ async function getCurrentlyPlaying(accessToken) {
       isPlaying: response.data.is_playing
     };
   } catch (err) {
-    console.error('Error getting currently playing:', err.message);
+    console.error('Error getting currently playing:', err.response?.status, err.response?.data || err.message);
     return null;
   }
 }
