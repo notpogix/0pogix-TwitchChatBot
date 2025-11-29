@@ -442,15 +442,14 @@ client.on('message', async (channel, userstate, message, self) => {
   }
 
   if (cmd === 'songconnect') {
-  const username = display;
-  const { url, codeVerifier } = spotify.getAuthorizationUrl(username);
-  state.spotifyVerifiers[username] = codeVerifier;
-  const publicUrl = process.env.PUBLIC_URL || `http://127.0.0.1:${PORT}`;
-  reply(`@${display} connect your Spotify here: ${publicUrl}/spotify/connect?user=${username}`);
-  saveState();
-  return;
-}
-
+    const username = display;
+    const { url, codeVerifier } = spotify.getAuthorizationUrl(username);
+    state.spotifyVerifiers[username] = codeVerifier;
+    const publicUrl = process.env.PUBLIC_URL || `http://127.0.0.1:${PORT}`;
+    reply(`@${display} connect your Spotify here: ${publicUrl}/spotify/connect?user=${username}`);
+    saveState();
+    return;
+  }
 
 
 
