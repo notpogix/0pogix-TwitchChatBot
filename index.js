@@ -364,7 +364,7 @@ client.connect().catch(err => console.error('Connection error:', err));
 client.on('connected', (addr, port) => {
   console.log(`Connected to ${addr}:${port}`);
   scheduleNextBonus();
-  setInterval(pollFollowers, 60_000);
+  // setInterval(pollFollowers, 60_000);
   setInterval(checkTimedReminders, REMINDER_CHECK_INTERVAL_MS);
 });
 
@@ -442,13 +442,17 @@ client.on('message', async (channel, userstate, message, self) => {
   }
 
   if (cmd === 'songconnect') {
-    const username = display;
-    const { url, codeVerifier } = spotify.getAuthorizationUrl(username);
-    state.spotifyVerifiers[username] = codeVerifier;
-    reply(`@${display} connect your Spotify here: http://127.0.0.1:${PORT}/spotify/connect?user=${username}`);
-    saveState();
-    return;
-  }
+  const username = display;
+  const { url, codeVerifier } = spotify.getAuthorizationUrl(username);
+  state.spotifyVerifiers[username] = codeVerifier;
+  const publicUrl = process.env.PUBLIC_URL || `http://127.0.0.1:${PORT}`;
+  reply(`@${display} connect your Spotify here: ${publicUrl}/spotify/connect?user=${username}`);
+  saveState();
+  return;
+}
+
+
+
 
   if (cmd === 'song') {
     const username = display;
