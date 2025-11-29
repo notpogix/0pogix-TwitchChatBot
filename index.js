@@ -321,10 +321,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/spotify/connect', (req, res) => {
-  const username = req.query.user;
-  if (!username) {
+  const usernameRaw = req.query.user;
+  if (!usernameRaw) {
     return res.status(400).send('Missing user parameter');
   }
+  const username = usernameRaw.toString().toLowerCase();
 
   const { url, codeVerifier } = spotify.getAuthorizationUrl(username);
   state.spotifyVerifiers[username] = codeVerifier;
@@ -334,11 +335,12 @@ app.get('/spotify/connect', (req, res) => {
 });
 
 app.get('/spotify/callback', async (req, res) => {
-  const { code, state: username } = req.query;
-  if (!code || !username) {
+  const { code, state: usernameRaw } = req.query;
+  if (!code || !usernameRaw) {
     return res.status(400).send('Missing code or state parameter');
   }
 
+  const username = usernameRaw.toString().toLowerCase();
   const codeVerifier = state.spotifyVerifiers[username];
   if (!codeVerifier) {
     return res.status(400).send('No authorization request found for this user');
@@ -442,7 +444,7 @@ client.on('message', async (channel, userstate, message, self) => {
   }
 
   if (cmd === 'songconnect') {
-    const username = display;
+    const username = display.toLowerCase();
     const { url, codeVerifier } = spotify.getAuthorizationUrl(username);
     state.spotifyVerifiers[username] = codeVerifier;
     const publicUrl = process.env.PUBLIC_URL || `http://127.0.0.1:${PORT}`;
@@ -451,10 +453,8 @@ client.on('message', async (channel, userstate, message, self) => {
     return;
   }
 
-
-
   if (cmd === 'song') {
-    const username = display;
+    const username = display.toLowerCase();
     const tokenData = state.spotifyTokens[username];
 
     if (!tokenData) {
